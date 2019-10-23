@@ -146,7 +146,75 @@ app.get('/state/:selected_state', (req, res) => {
     ReadFile(path.join(template_dir, 'state.html')).then((template) => {
         let response = template;
         // modify `response` here
-        WriteHtml(res, response);
+        var sqlState = "select * from States"
+        var sqlConsumption = "select * from Consumption where state_abbreviation = ?"
+        var { selected_state } = req.params;
+        var params = [selected_state]
+        db.all(sqlState, [], (err, rows) => {
+            if (err) {
+                console.log('An error occurred: ' + err.message);
+                return;
+            }
+
+            let selectedState = rows.filter(state => state.state_abbreviation === selected_state)
+            console.log('selectedState:', selectedState)
+
+            if (selectedState.length === 0) {
+                WriteHtml(res, `Error: no data for State ${selected_state}`);
+                return
+            }
+
+            let state_name = selectedState[0].state_name;
+
+            db.all(sqlConsumption, params, (error, data) => {
+                if (error) {
+                    console.log('An error occurred: ' + err.message);
+                    return;
+                }
+                // console.log('DATA:', data)
+                let yearArray = data.map(energy => energy.year)
+                let coalEnergyArray = data.map(energy => energy.coal)
+                let natural_gasEnergyArray = data.map(energy => energy.natural_gas)
+                let nuclearEnergyArray = data.map(energy => energy.nuclear)
+                let petroleumEnergyArray = data.map(energy => energy.petroleum)
+                let renewableEnergyArray = data.map(energy => energy.renewable)
+
+                data.map(eachData => {
+                    let sum = eachData.coal + eachData.natural_gas + eachData.nuclear + eachData.petroleum + eachData.renewable;
+                    eachData.energy_sum = sum
+                    return eachData;
+                });
+                // console.log('DATA:', data)
+                const stateArray = rows.map(state => state.state_abbreviation)
+                // console.log('stateArray', stateArray)
+
+                let previous;
+                let next;
+                for(let i = 0; i <= stateArray.length - 1; i++) {
+                    if(i === stateArray.indexOf(selected_state)) {
+                        previous = stateArray[i - 1] ? stateArray[i - 1] : selected_state
+                        next = stateArray[i + 1] ? stateArray[i + 1] : selected_state
+                    }
+                }
+
+                const state = {
+                    state_name: state_name,
+                    yearArray: yearArray,
+                    coalEnergyArray: coalEnergyArray,
+                    natural_gasEnergyArray: natural_gasEnergyArray,
+                    nuclearEnergyArray: nuclearEnergyArray,
+                    petroleumEnergyArray: petroleumEnergyArray,
+                    renewableEnergyArray: renewableEnergyArray,
+                    data,
+                    img_alt: `The State of ${state_name}`,
+                    previous_state: previous,
+                    next_state: next
+                }
+                const modifiedResponse = handlebars.compile(response)
+                response = modifiedResponse(state)
+                WriteHtml(res, response);
+            });
+        });
     }).catch((err) => {
         Write404Error(res);
     });
