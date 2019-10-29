@@ -171,7 +171,7 @@ app.get('/state/:selected_state', (req, res) => {
                     console.log('An error occurred: ' + err.message);
                     return;
                 }
-                // console.log('DATA:', data)
+                console.log('DATA:', data)
                 let yearArray = data.map(energy => energy.year)
                 let coalEnergyArray = data.map(energy => energy.coal)
                 let natural_gasEnergyArray = data.map(energy => energy.natural_gas)
@@ -225,7 +225,33 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
     ReadFile(path.join(template_dir, 'energy.html')).then((template) => {
         let response = template;
         // modify `response` here
+        
+        var sql = "select * from Consumption"
+        var { selected_energy_type } = req.params;
+
+        db.all(sql, [], (err, rows) => {
+            if (err) {
+                console.log('An error occurred: ' + err.message);
+                return;
+            }
+            let coalEnergytype = rows.map(energy => {
+                if(selected_energy_type === 'coal') {
+                    let coalEnergyObj = {}
+                    coalEnergyObj.year = energy.year
+                    coalEnergyObj.state_abbreviation = energy.state_abbreviation
+                    coalEnergyObj.coal = energy.coal
+                    return coalEnergyObj;
+                }
+            })
+            let coal = rows.map(energy => energy.coal)
+            console.log('MY COAL:', coal);
+            const stateArray = rows.map(state => state.state_abbreviation)
+            console.log('stateArray', stateArray);
+
+            
+
         WriteHtml(res, response);
+        });
     }).catch((err) => {
         Write404Error(res);
     });
