@@ -3,23 +3,23 @@
     "version": "0.0.0",
     "description": "Dynamic Web Server using Node JS",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "KongPheng Lee",
+        "email": "Lee05444@stthomas.edu"
     },
     "contributors": [
         {
-            "name": "",
-            "email": ""
+            "name": "KongPheng Lee",
+            "email": "Lee05444@stthomas.edu"
         },
         {
-            "name": "",
-            "email": ""
+            "name": " Lao Lee",
+            "email": "lee03366@stthomas.edu"
         }
     ],
     "main": "server.js",
     "repository": {
         "type": "git",
-        "url": ""
+        "url": "https://github.com/Kong-Lee1/CISC375---Assignment-2"
     },
     "dependencies": {
         "express": "^4.17.1",
