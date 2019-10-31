@@ -40,11 +40,11 @@ app.get('/', (req, res) => {
                 console.log('An error occurred: ' + err.message);
                 return;
             }
-            //console.log('MY ROWS:', rows)
+            //console.log('Rows:', rows)
             let coal = rows.map(energy => energy.coal)
-            // console.log('MY COAL:', coal)
+            // console.log('Coal Amount:', coal)
             let coal_count = coal.reduce((previous, current) => previous + current);
-            // console.log('MY TOTAL COAL:', coal_count)
+            // console.log('Total Amount:', coal_count)
 
             let natural_gas = rows.map(energy => energy.natural_gas)
             let natural_gas_count = natural_gas.reduce((previous, current) => previous + current);
@@ -157,7 +157,7 @@ app.get('/state/:selected_state', (req, res) => {
             }
 
             let selectedState = rows.filter(state => state.state_abbreviation === selected_state)
-            console.log('selectedState:', selectedState)
+            //console.log('selectedState:', selectedState)
 
             if (selectedState.length === 0) {
                 WriteHtml(res, `Error: no data for State ${selected_state}`);
@@ -171,7 +171,7 @@ app.get('/state/:selected_state', (req, res) => {
                     console.log('An error occurred: ' + err.message);
                     return;
                 }
-                console.log('DATA:', data)
+                // console.log('DATA:', data)
                 let yearArray = data.map(energy => energy.year)
                 let coalEnergyArray = data.map(energy => energy.coal)
                 let natural_gasEnergyArray = data.map(energy => energy.natural_gas)
@@ -225,32 +225,64 @@ app.get('/energy-type/:selected_energy_type', (req, res) => {
     ReadFile(path.join(template_dir, 'energy.html')).then((template) => {
         let response = template;
         // modify `response` here
-        
-        var sql = "select * from Consumption"
-        var { selected_energy_type } = req.params;
-
+        var { selected_energy_type } = req.params; // DESTRUCTURE
+        var sql = `select ${selected_energy_type}, year, state_abbreviation from Consumption ORDER BY year`
         db.all(sql, [], (err, rows) => {
             if (err) {
-                console.log('An error occurred: ' + err.message);
+                console.log('An error occured:' + err.message);
                 return;
             }
-            let coalEnergytype = rows.map(energy => {
-                if(selected_energy_type === 'coal') {
-                    let coalEnergyObj = {}
-                    coalEnergyObj.year = energy.year
-                    coalEnergyObj.state_abbreviation = energy.state_abbreviation
-                    coalEnergyObj.coal = energy.coal
-                    return coalEnergyObj;
-                }
-            })
-            let coal = rows.map(energy => energy.coal)
-            console.log('MY COAL:', coal);
-            const stateArray = rows.map(state => state.state_abbreviation)
-            console.log('stateArray', stateArray);
-
+            if(rows.length === 0) {
+                WriteHtml(res, `Error: no data for Energy ${selected_energy_type}`);
+                return;
+            }
             
+            var statesArray = rows.map(row => row.state_abbreviation).filter((value, index, self) => self.indexOf(value) == index); // get unique
+            var energyArray = {};
+            
+            statesArray.forEach((state) => {
+                energyArray[state] = rows.filter(row=>row.state_abbreviation == state).map(data => data[selected_energy_type]);
+            });
+            
+            var yearsArray = rows.map(row => row.year).filter((value, index, self) => self.indexOf(value) == index);// unique years
+            var rowsUpdated = new Array();
+            yearsArray.forEach((yearVal) => {
+                var tempRow = {};
+                var sum = 0;
+                rows.filter(row => row.year == yearVal).forEach((data) => {
+                    tempRow[data.state_abbreviation] = data[selected_energy_type];
+                    sum += data[selected_energy_type];
+                });
+                tempRow.year = yearVal 
+                tempRow.total = sum;
 
-        WriteHtml(res, response);
+                rowsUpdated.push(tempRow);
+            })
+
+            var energyTypes = ['coal', 'natural_gas', 'nuclear', 'petroleum', 'renewable'];
+            
+            let previous;
+            let next;
+            for(let i = 0; i < energyTypes.length; i++) {
+                if(i === energyTypes.indexOf(selected_energy_type)) {
+                    previous = energyTypes[i - 1] ? energyTypes[i - 1] : energyTypes[energyTypes.length - 1];
+                    next = energyTypes[i + 1] ? energyTypes[i + 1] : energyTypes[0];
+                }
+            }
+
+            const energy = {
+                energyType: selected_energy_type,
+                energyValuesArray: JSON.stringify(energyArray),
+                states: statesArray,
+                energy_name: selected_energy_type.charAt(0).toUpperCase() + selected_energy_type.replace("_"," ").slice(1),
+                img_alt: `Type of energy:${selected_energy_type}`,
+                previous_energy: previous,
+                next_energy: next,
+                rows: rowsUpdated
+            }
+            const modifiedResponse = handlebars.compile(response);
+            response = modifiedResponse(energy);
+            WriteHtml(res, response);
         });
     }).catch((err) => {
         Write404Error(res);
