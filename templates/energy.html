@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <title>US Energy Consumption</title> <!-- change title to include year (e.g. 1999 US Energy Consumption) -->
+    <title> {{energy_name}} US Energy Consumption</title> <!-- change title to include year (e.g. 1999 US Energy Consumption) -->
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://cdn.anychart.com/releases/8.7.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.7.0/js/anychart-cartesian.min.js"></script>
@@ -11,8 +11,9 @@
     <script type="application/javascript" src="/scripts/energyvis.js"></script>
     <script type="application/javascript">
         // `energy_type` and object of consumption per year per state --> set these variables equal to appropriate value
-        var energy_type;
-        var energy_counts;  // e.g. {AK: [...], AL: [...], AR: [...], ...}
+        var energy_type = '{{energyType}}';
+        var energy_name = '{{energy_name}}'
+        var energy_counts = {{{energyValuesArray}}};  // e.g. {AK: [...], AL: [...], AR: [...], ...}
     </script>
 </head>
 <body onload="Init()">
@@ -31,7 +32,7 @@
                     <option value="state">State</option>
                     <option value="energy-type" selected>Energy Type</option>
                 </select>
-                <label for="view_value">Select year: </label>
+                <label for="view_value">Select Energy Type: </label>
                 <select id="view_value">
                 </select>
                 <button type="button" onclick="SubmitView()">View</button>
@@ -44,12 +45,12 @@
                     <h2>Consumption Snapshot</h2> <!-- change header to include energy type (e.g. Coal Consumption Snaphot) -->
                 </div>
                 <div class="right">
-                    <a class="prev_next" href="">XX</a> <!-- change XX to prev enery type, link to Renewable if energy is Coal -->
-                    <a class="prev_next" href="">XX</a> <!-- change XX to next enery type, link to Coal if energy is Renewable -->
+                    <a class="prev_next" href="http://localhost:8000/energy-type/{{previous_energy}}">{{previous_energy}}</a> <!-- change XX to prev enery type, link to Renewable if energy is Coal -->
+                    <a class="prev_next" href="http://localhost:8000/energy-type/{{next_energy}}">{{next_energy}}</a> <!-- change XX to next enery type, link to Coal if energy is Renewable -->
                 </div>
                 <div class="spacer1"></div>
                 <div class="left">
-                    <img src="/images/noimage.jpg" alt="No Image" width="250" height="auto" /> <!-- change src and alt for energy type image -->
+                    <img src="/images/{{energy_name}}.png" alt={{img_alt}} width="250" height="auto" /> <!-- change src and alt for energy type image -->
                 </div>
                 <div class="right">
                     <div id="snapshot"></div>
@@ -121,6 +122,65 @@
                 </thead>
                 <tbody>
                     <!-- Data to be inserted here -->
+                    {{# each rows}}
+                        <tr>
+                            <td>
+                                {{this.year}}
+                            </td>
+                        <td>{{this.AK}}</td>
+                        <td>{{this.AL}}</td>
+                        <td>{{this.AR}}</td>
+                        <td>{{this.AZ}}</td>
+                        <td>{{this.CA}}</td>
+                        <td>{{this.CO}}</td>
+                        <td>{{this.CT}}</td>
+                        <td>{{this.DC}}</td>
+                        <td>{{this.DE}}</td>
+                        <td>{{this.FL}}</td>
+                        <td>{{this.GA}}</td>
+                        <td>{{this.HI}}</td>
+                        <td>{{this.IA}}</td>
+                        <td>{{this.ID}}</td>
+                        <td>{{this.IL}}</td>
+                        <td>{{this.IN}}</td>
+                        <td>{{this.KS}}</td>
+                        <td>{{this.KY}}</td>
+                        <td>{{this.LA}}</td>
+                        <td>{{this.MA}}</td>
+                        <td>{{this.MD}}</td>
+                        <td>{{this.ME}}</td>
+                        <td>{{this.MI}}</td>
+                        <td>{{this.MN}}</td>
+                        <td>{{this.MO}}</td>
+                        <td>{{this.MS}}</td>
+                        <td>{{this.MT}}</td>
+                        <td>{{this.NC}}</td>
+                        <td>{{this.ND}}</td>
+                        <td>{{this.NE}}</td>
+                        <td>{{this.NH}}</td>
+                        <td>{{this.NJ}}</td>
+                        <td>{{this.NM}}</td>
+                        <td>{{this.NV}}</td>
+                        <td>{{this.NY}}</td>
+                        <td>{{this.OH}}</td>
+                        <td>{{this.OK}}</td>
+                        <td>{{this.OR}}</td>
+                        <td>{{this.PA}}</td>
+                        <td>{{this.RI}}</td>
+                        <td>{{this.SC}}</td>
+                        <td>{{this.SD}}</td>
+                        <td>{{this.TN}}</td>
+                        <td>{{this.TX}}</td>
+                        <td>{{this.UT}}</td>
+                        <td>{{this.VA}}</td>
+                        <td>{{this.VT}}</td>
+                        <td>{{this.WA}}</td>
+                        <td>{{this.WI}}</td>
+                        <td>{{this.WV}}</td>
+                        <td>{{this.WY}}</td>
+                        <td>{{this.total}}</td>
+                        </tr>
+                    {{/each}}
                 </tbody>
             </table>
             </div>

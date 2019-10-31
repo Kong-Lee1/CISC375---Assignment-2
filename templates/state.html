@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-    <title>{{selected_year}} US Energy Consumption</title> <!-- change title to include year (e.g. 1999 US Energy Consumption) -->
+    <title>{{state_name}} US Energy Consumption</title> <!-- change title to include year (e.g. 1999 US Energy Consumption) -->
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://cdn.anychart.com/releases/8.7.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.7.0/js/anychart-cartesian.min.js"></script>
@@ -12,7 +12,6 @@
     <script type="application/javascript">
         // `state` and arrays of consumption per year --> set these variables equal to appropriate value
         var state = '{{state_name}}';
-		//var year = {{selected_year}};
         var coal_counts = [{{coalEnergyArray}}];  // e.g. [1234, 2567, ...]
         var natural_gas_counts = [{{natural_gasEnergyArray}}];
         var nuclear_counts = [{{nuclearEnergyArray}}];
@@ -36,7 +35,7 @@
                     <option value="state" selected>State</option>
                     <option value="energy-type">Energy Type</option>
                 </select>
-                <label for="view_value">Select year: </label>
+                <label for="view_value">Select State: </label>
                 <select id="view_value">
                 </select>
                 <button type="button" onclick="SubmitView()">View</button>
